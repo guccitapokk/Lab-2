@@ -1,28 +1,23 @@
-from csv import reader
+import xml.dom.minidom as minidom
 
+xml_file = open('currency.xml', 'r', encoding='latin-1')
+xml_data = xml_file.read()
 
-output = open('result.txt', 'w')
+dom = minidom.parseString(xml_data)
+dom.normalize()
 
-while True:
-    flag = 0
-    search = input('Введите запрос: ')
-    if search == '0':
-        break
-    with open('civic.csv', 'r', encoding='windows-1251') as csvfile:
-        table = reader(csvfile, delimiter=';')
-        for row in table:
-            lower_case = row[2].lower()
-            index = lower_case.find(search.lower())
-            if index != -1:
-                print(row[2])
-                output.write(f'{row[2]}. Цена {row[8]} руб. S/n {row[18]}\n')
-                flag += 1
+elements = dom.getElementsByTagName('Valute')
+books_dict = {}
 
+for node in elements:
+    for child in node.childNodes:
+        if child.nodeType == 1:
+            if child.tagName == 'Name':
+                if child.firstChild.nodeType == 3:
+                    name = child.firstChild.data
+            if child.tagName == 'CharCode':
+                if child.firstChild.nodeType == 3:
+                    charcode = str (child.firstChild.data)
+    books_dict[name]=charcode
 
-
-        if flag == 0:
-            print('Ничего не найдено.')
-        else:
-            print(f'Найдено {flag} результатов.')
-
-output.close()
+print(books_dict)
